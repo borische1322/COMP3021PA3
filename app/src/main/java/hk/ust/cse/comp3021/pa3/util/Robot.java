@@ -54,12 +54,15 @@ public class Robot implements MoveDelegate {
      * That is to say, the new thread should:
      * <ol>
      *   <li>Stop all existing threads by calling {@link Robot#stopDelegation()}</li>
-     *   <li>Wait for some time (obtained from {@link TimeIntervalGenerator#next()}</li>
-     *   <li>Make a move, call {@link Robot#makeMoveRandomly(MoveProcessor)} or
-     *   {@link Robot#makeMoveSmartly(MoveProcessor)} according to {@link Robot#strategy}</li>
-     *   <li>goto 2</li>
+     *   <li>Start a new thread. And inside the thread:</li>
+     *   <ul>
+     *      <li>Wait for some time (obtained from {@link TimeIntervalGenerator#next()}</li>
+     *      <li>Make a move, call {@link Robot#makeMoveRandomly(MoveProcessor)} or
+     *      {@link Robot#makeMoveSmartly(MoveProcessor)} according to {@link Robot#strategy}</li>
+     *      <li>repeat</li>
+     *   </ul>
      * </ol>
-     * The thread should be able to exit when {@link Robot#stopDelegation()} is called.
+     * The started thread should be able to exit when {@link Robot#stopDelegation()} is called.
      * <p>
      *
      * @param processor The processor to make movements.

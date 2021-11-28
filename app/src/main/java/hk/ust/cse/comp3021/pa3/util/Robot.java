@@ -3,6 +3,7 @@ package hk.ust.cse.comp3021.pa3.util;
 import hk.ust.cse.comp3021.pa3.model.Direction;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.model.MoveResult;
+import javafx.application.Platform;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -35,6 +36,11 @@ public class Robot implements MoveDelegate {
      */
     private final Strategy strategy;
 
+    /**
+     * an atomic boolean value to keep in check when to delete a thread, added by me
+     */
+    private final AtomicBoolean running = new AtomicBoolean(true);
+
     public Robot(GameState gameState) {
         this(gameState, Strategy.Random);
     }
@@ -45,7 +51,7 @@ public class Robot implements MoveDelegate {
     }
 
     /**
-     * TODO Start the delegation in a new thread.
+     * TODO ok Start the delegation in a new thread.
      * The delegation should run in a separate thread.
      * This method should return immediately when the thread is started.
      * <p>
@@ -69,16 +75,33 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void startDelegation(@NotNull MoveProcessor processor) {
+        this.stopDelegation();
+        running.set(true);
+        Thread thread1 =  new Thread() {
+            public void run() {
+                while(!gameState.noGemsLeft() && running.get()) {
+                    try {
+                        Thread.sleep(timeIntervalGenerator.next());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Platform.runLater( () -> makeMoveRandomly(processor) );
 
+                }
+                System.out.println("Killed");
+
+            }
+        };
+        thread1.start();
     }
 
     /**
-     * TODO Stop the delegations, i.e., stop the thread of this instance.
+     * TODO ok Stop the delegations, i.e., stop the thread of this instance.
      * When this method returns, the thread must have exited already.
      */
     @Override
     public void stopDelegation() {
-
+        running.set(false);
     }
 
     private MoveResult tryMove(Direction direction) {

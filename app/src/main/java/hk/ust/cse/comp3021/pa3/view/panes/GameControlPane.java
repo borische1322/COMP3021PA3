@@ -122,6 +122,7 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      * should be enabled to allow control from GUI, i.e., call {@link GameControlPane#enable()}.
      */
     public void revokeControl() {
+        moveDelegate.stopDelegation();
         enable();
     }
 

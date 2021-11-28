@@ -183,7 +183,7 @@ public class GameController {
         int numLost = 0;
         int winnerScore = 0;
         for (int i = 0; i < playersGS.length; i++){
-            if (playersGS[i].getScore() > winnerScore){
+            if (playersGS[i].getScore() > winnerScore && !playersGS[i].hasLost()){
                 winnerScore = playersGS[i].getScore();
             }
             if (playersGS[i].getNumLives() == 0){

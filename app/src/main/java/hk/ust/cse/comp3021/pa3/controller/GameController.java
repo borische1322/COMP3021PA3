@@ -177,6 +177,26 @@ public class GameController {
      */
     @Nullable
     public Player[] getWinners() {
-        throw new NotImplementedException();
+        GameState[] playersGS = getGameStates();
+        GameBoard gb = playersGS[0].getGameBoard();
+        boolean everyPlayerLost = true;
+        int winnerGems = 0;
+        for (int i = 0; i < playersGS.length; i++){
+            if (playersGS[i].getNumGems() > winnerGems){
+                winnerGems = playersGS[i].getNumGems();
+                everyPlayerLost = !playersGS[i].hasLost();
+            }
+        }
+        if (gb.getNumGems() != 0 || everyPlayerLost){
+            return null;
+        }
+        ArrayList<Player> winners = new ArrayList<Player>();
+        for (int i = 0; i < playersGS.length; i++){
+            if (playersGS[i].getNumGems() == winnerGems){
+                winners.add(playersGS[i].getPlayer());
+            }
+        }
+        Player[] winnerArray = {};
+        return winners.toArray(winnerArray);
     }
 }

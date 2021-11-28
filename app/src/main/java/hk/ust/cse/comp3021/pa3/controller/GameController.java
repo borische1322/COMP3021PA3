@@ -170,7 +170,7 @@ public class GameController {
     }
 
     /**
-     * TODO Get winners of the game.
+     * TODO ok Get winners of the game.
      * You can find the winning conditions from README.
      *
      * @return null if the game has not finished yet; otherwise emtpy array if there is no winners, or non-empty array if there are winners.
@@ -179,20 +179,31 @@ public class GameController {
     public Player[] getWinners() {
         GameState[] playersGS = getGameStates();
         GameBoard gb = playersGS[0].getGameBoard();
-        boolean everyPlayerLost = true;
-        int winnerGems = 0;
+
+        int numLost = 0;
+        int winnerScore = 0;
         for (int i = 0; i < playersGS.length; i++){
-            if (playersGS[i].getNumGems() > winnerGems){
-                winnerGems = playersGS[i].getNumGems();
-                everyPlayerLost = !playersGS[i].hasLost();
+            if (playersGS[i].getScore() > winnerScore){
+                winnerScore = playersGS[i].getScore();
+            }
+            if (playersGS[i].getNumLives() == 0){
+                numLost = numLost + 1;
             }
         }
-        if (gb.getNumGems() != 0 || everyPlayerLost){
+
+        if (numLost == playersGS.length){
+            Player[] no = {};
+            return no;
+        }
+
+        if (gb.getNumGems() != 0){
             return null;
         }
         ArrayList<Player> winners = new ArrayList<Player>();
         for (int i = 0; i < playersGS.length; i++){
-            if (playersGS[i].getNumGems() == winnerGems){
+            if (playersGS[i].getScore() == winnerScore){
+                System.out.println(playersGS[i].getPlayer().getId());
+                System.out.println(playersGS[i].getScore());
                 winners.add(playersGS[i].getPlayer());
             }
         }

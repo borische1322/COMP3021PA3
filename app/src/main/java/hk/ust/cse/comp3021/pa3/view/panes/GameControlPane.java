@@ -5,6 +5,7 @@ import hk.ust.cse.comp3021.pa3.model.Direction;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.model.Player;
 import hk.ust.cse.comp3021.pa3.util.MoveDelegate;
+import hk.ust.cse.comp3021.pa3.util.Robot;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.events.MoveEvent;
 import javafx.application.Platform;
@@ -94,7 +95,7 @@ public class GameControlPane extends GridPane implements GameUIComponent {
     }
 
     /**
-     * TODO Delegate the control of movement from the GUI to an automated delegate.
+     * TODO ok Delegate the control of movement from the GUI to an automated delegate.
      * Call the {@link MoveDelegate#startDelegation(MoveDelegate.MoveProcessor)} method of the given delegate.
      * <p>
      * After delegation, the {@link GameControlPane#upButton}, {@link GameControlPane#downButton},
@@ -104,17 +105,24 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      * @param delegate The automated delegate to control the movement.
      */
     public void delegateControl(MoveDelegate delegate) {
-
+        moveDelegate = delegate;
+        delegate.startDelegation(new MoveDelegate.MoveProcessor() {
+            @Override
+            public void move(@NotNull Direction direction) {
+                GameControlPane.this.move(direction);
+            }
+        });
+        disable();
     }
 
     /**
-     * TODO Revoke the control from the delegate if there is any.
+     * TODO ok Revoke the control from the delegate if there is any.
      * After revoking delegation, the {@link GameControlPane#upButton}, {@link GameControlPane#downButton},
      * {@link GameControlPane#leftButton}, and {@link GameControlPane#rightButton}
      * should be enabled to allow control from GUI, i.e., call {@link GameControlPane#enable()}.
      */
     public void revokeControl() {
-
+        enable();
     }
 
     /**

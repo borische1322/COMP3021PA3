@@ -181,7 +181,7 @@ public class GameController {
         GameBoard gb = playersGS[0].getGameBoard();
 
         int numLost = 0;
-        int winnerScore = 0;
+        int winnerScore = playersGS[1].getScore();
         for (int i = 0; i < playersGS.length; i++){
             if (playersGS[i].getScore() > winnerScore && !playersGS[i].hasLost()){
                 winnerScore = playersGS[i].getScore();
@@ -193,21 +193,24 @@ public class GameController {
 
         if (numLost == playersGS.length){
             Player[] no = {};
+            System.out.println("both lost");
             return no;
         }
 
         if (gb.getNumGems() != 0){
+            System.out.println("not yet finish");
             return null;
         }
         ArrayList<Player> winners = new ArrayList<Player>();
         for (int i = 0; i < playersGS.length; i++){
+            System.out.println("Thread id: " + Thread.currentThread() + " " + "Score: " + winnerScore);
             if (playersGS[i].getScore() == winnerScore){
-                System.out.println(playersGS[i].getPlayer().getId());
-                System.out.println(playersGS[i].getScore());
                 winners.add(playersGS[i].getPlayer());
             }
         }
         Player[] winnerArray = {};
+        System.out.println("Thread id: " + Thread.currentThread() + " " + "someone won");
+        System.out.println(winners);
         return winners.toArray(winnerArray);
     }
 }

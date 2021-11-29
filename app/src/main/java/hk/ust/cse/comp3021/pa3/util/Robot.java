@@ -6,8 +6,13 @@ import hk.ust.cse.comp3021.pa3.model.MoveResult;
 import javafx.application.Platform;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The Robot is an automated worker that can delegate the movement control of a player.
@@ -41,6 +46,19 @@ public class Robot implements MoveDelegate {
      */
     private final AtomicBoolean running = new AtomicBoolean(true);
 
+    private final int id;
+
+    private static int numRobots = 0;
+
+    private static Lock lock = new ReentrantLock();
+
+    private static final AtomicInteger nextId = new AtomicInteger(0);
+
+    private final AtomicInteger waitForFx = new AtomicInteger(0);
+
+    private int count = 0;
+    private int FXcount = 0;
+
     public Robot(GameState gameState) {
         this(gameState, Strategy.Random);
     }
@@ -48,6 +66,8 @@ public class Robot implements MoveDelegate {
     public Robot(GameState gameState, Strategy strategy) {
         this.strategy = strategy;
         this.gameState = gameState;
+        this.id = numRobots;
+        numRobots++;
     }
 
     /**
@@ -75,20 +95,35 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void startDelegation(@NotNull MoveProcessor processor) {
-        this.stopDelegation();
+        System.out.println("Created");
+                this.stopDelegation();
         running.set(true);
         Thread thread1 =  new Thread() {
             public void run() {
                 while(!gameState.noGemsLeft() && running.get()) {
+                    waitForFx.set(0);
+                    count++;
+                    //System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "whileloop:" + (!gameState.noGemsLeft() && running.get()));
                     try {
-                        Thread.sleep(timeIntervalGenerator.next());
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                   // System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "Any gems:" + !gameState.noGemsLeft());
+                    //System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "been killed?:" + running.get());
+                    //System.out.println(count + " Thread id: " + Thread.currentThread() + " ");
+
                     Platform.runLater( () -> makeMoveRandomly(processor) );
+                    while(waitForFx.get() == 0 && !gameState.noGemsLeft() && running.get()){
+                    }
+
+                    if (gameState.hasLost()){
+                        stopDelegation();
+                    }
+
 
                 }
-                System.out.println("Killed");
+                System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "Killed " + id);
 
             }
         };
@@ -125,10 +160,19 @@ public class Robot implements MoveDelegate {
      * @param processor The processor to make movements.
      */
     private void makeMoveRandomly(MoveProcessor processor) {
+        if (!(!gameState.noGemsLeft() && running.get())){
+            System.out.println(count + " HHH");
+            return;
+        }
+
+        waitForFx.set(0);
+        FXcount++;
         var directions = new ArrayList<>(Arrays.asList(Direction.values()));
         Collections.shuffle(directions);
         Direction aliveDirection = null;
         Direction deadDirection = null;
+        lock.lock();
+        System.out.println(FXcount +" " + count + " " + id);
         for (var direction :
                 directions) {
             var result = tryMove(direction);
@@ -143,6 +187,10 @@ public class Robot implements MoveDelegate {
         } else if (deadDirection != null) {
             processor.move(deadDirection);
         }
+        System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "Finish");
+        lock.unlock();
+        waitForFx.set(1);
+
     }
 
     /**

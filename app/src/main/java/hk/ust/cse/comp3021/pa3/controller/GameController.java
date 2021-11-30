@@ -192,24 +192,24 @@ public class GameController {
 
         if (numLost == playersGS.length){
             Player[] no = {};
-            System.out.println("both lost");
+            //System.out.println("both lost");
             return no;
         }
 
         if (gb.getNumGems() != 0){
-            System.out.println("not yet finish");
+            //System.out.println("not yet finish");
             return null;
         }
         ArrayList<Player> winners = new ArrayList<Player>();
         for (int i = 0; i < playersGS.length; i++){
-            System.out.println("Thread id: " + Thread.currentThread() + " " + "Score: " + winnerScore);
+            //System.out.println("Thread id: " + Thread.currentThread() + " " + "Score: " + winnerScore);
             if (playersGS[i].getScore() == winnerScore){
                 winners.add(playersGS[i].getPlayer());
             }
         }
         Player[] winnerArray = {};
-        System.out.println("Thread id: " + Thread.currentThread() + " " + "someone won");
-        System.out.println(winners);
+        //System.out.println("Thread id: " + Thread.currentThread() + " " + "someone won");
+        //System.out.println(winners);
         return winners.toArray(winnerArray);
     }
 }

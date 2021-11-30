@@ -181,7 +181,7 @@ public class GameController {
         GameBoard gb = playersGS[0].getGameBoard();
 
         int numLost = 0;
-        int winnerScore = playersGS[1].getScore();
+        int winnerScore = playersGS[0].getScore();
         for (int i = 0; i < playersGS.length; i++){
             if (playersGS[i].getScore() > winnerScore && !playersGS[i].hasLost()){
                 winnerScore = playersGS[i].getScore();

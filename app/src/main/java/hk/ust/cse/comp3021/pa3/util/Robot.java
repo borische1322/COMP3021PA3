@@ -3,6 +3,7 @@ package hk.ust.cse.comp3021.pa3.util;
 import hk.ust.cse.comp3021.pa3.model.Direction;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.model.MoveResult;
+import hk.ust.cse.comp3021.pa3.model.Position;
 import javafx.application.Platform;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,6 +60,8 @@ public class Robot implements MoveDelegate {
     private int count = 0;
     private int FXcount = 0;
 
+    private ArrayList<Position> old = new ArrayList<Position>();
+
     public Robot(GameState gameState) {
         this(gameState, Strategy.Random);
     }
@@ -105,15 +108,17 @@ public class Robot implements MoveDelegate {
                     count++;
                     //System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "whileloop:" + (!gameState.noGemsLeft() && running.get()));
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(10);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                    // System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "Any gems:" + !gameState.noGemsLeft());
                     //System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "been killed?:" + running.get());
                     //System.out.println(count + " Thread id: " + Thread.currentThread() + " ");
-
-                    Platform.runLater( () -> makeMoveRandomly(processor) );
+                    if (strategy == Strategy.Random)
+                        Platform.runLater( () -> makeMoveRandomly(processor) );
+                    else
+                        Platform.runLater( () -> makeMoveSmartly(processor) );
                     while(waitForFx.get() == 0 && !gameState.noGemsLeft() && running.get()){
                     }
 
@@ -206,7 +211,92 @@ public class Robot implements MoveDelegate {
      * @param processor The processor to make movements.
      */
     private void makeMoveSmartly(MoveProcessor processor) {
+        if (!(!gameState.noGemsLeft() && running.get())){
+            System.out.println(count + " HHH");
+            return;
+        }
 
+        waitForFx.set(0);
+        FXcount++;
+        var directions = new ArrayList<>(Arrays.asList(Direction.values()));
+        Map<Direction, Integer> moves = new HashMap<>();
+        lock.lock();
+        MoveResult old = null;
+        var chose = new ArrayList<Direction>();
+        try{
+            old = gameState.getMoveStack().peek();
+        } catch(IndexOutOfBoundsException e){
+        }
+        System.out.println(FXcount +" " + count + " " + id);
+        for (var direction :
+                directions) {
+            var result = tryMove(direction);
+            if (result instanceof MoveResult.Valid.Alive && !((MoveResult.Valid.Alive) result).collectedGems.isEmpty()){
+                moves.put(direction, 3);
+                System.out.println("Have Gem");
+            } else if (result instanceof MoveResult.Valid.Alive && old != null &&
+                    (result.newPosition.row()==((MoveResult.Valid.Alive) old).origPosition.row()) &&
+                    (result.newPosition.col()==((MoveResult.Valid.Alive) old).origPosition.col())){
+                moves.put(direction, 1);
+            }
+            else if (result instanceof MoveResult.Valid.Alive) {
+                moves.put(direction, 2);
+            } else if (result instanceof MoveResult.Valid.Dead) {
+                moves.put(direction, 0);
+            } else {
+                moves.put(direction, null);
+            }
+        }
+        if (moves.containsValue(3)){
+            Direction toGo = null;
+            for (Direction k : directions){
+                if (moves.get(k) == null)
+                    continue;
+                if (moves.get(k) == 3) {
+                    chose.add(k);
+                }
+            }
+            Collections.shuffle(chose);
+            processor.move(chose.get(0));
+        }
+        else if (moves.containsValue(2)) {
+            Direction toGo = null;
+            for (Direction k : directions){
+                if (moves.get(k) == null)
+                    continue;
+                if (moves.get(k) == 2) {
+                    chose.add(k);
+
+                }
+            }
+            Collections.shuffle(chose);
+            processor.move(chose.get(0));
+        } else if (moves.containsValue(1)) {
+            Direction toGo = null;
+            for (Direction k : directions){
+                if (moves.get(k) == null)
+                    continue;
+                if (moves.get(k) == 1) {
+                    chose.add(k);
+                }
+            }
+            Collections.shuffle(chose);
+            processor.move(chose.get(0));
+        } else if (moves.containsValue(0)) {
+            Direction toGo = null;
+            for (Direction k : directions){
+                if (moves.get(k) == null)
+                    continue;
+                if (moves.get(k) == 0) {
+                    chose.add(k);
+                }
+            }
+            Collections.shuffle(chose);
+            processor.move(chose.get(0));
+        }
+        System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "Finish");
+        lock.unlock();
+        waitForFx.set(1);
     }
 
 }

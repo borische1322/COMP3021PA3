@@ -5,10 +5,8 @@ import hk.ust.cse.comp3021.pa3.model.Direction;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.model.Player;
 import hk.ust.cse.comp3021.pa3.util.MoveDelegate;
-import hk.ust.cse.comp3021.pa3.util.Robot;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.events.MoveEvent;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.event.EventHandler;
@@ -107,7 +105,7 @@ public class GameControlPane extends GridPane implements GameUIComponent {
     public void delegateControl(MoveDelegate delegate) {
         moveDelegate = delegate;
         getGameState().setRobot(delegate);
-        delegate.startDelegation(direction -> GameControlPane.this.move(direction));
+        delegate.startDelegation(GameControlPane.this::move);
         disable();
     }
 

@@ -4,11 +4,9 @@ import hk.ust.cse.comp3021.pa3.model.*;
 import javafx.application.Platform;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -44,22 +42,22 @@ public class Robot implements MoveDelegate {
      */
     private final AtomicBoolean running = new AtomicBoolean(true);
 
-    private final int id;
+    //private final int id;
 
-    private static int numRobots = 0;
+    //private static int numRobots = 0;
 
-    private static Lock lock = new ReentrantLock();
+    private static final Lock LOCK = new ReentrantLock();
 
-    private static final AtomicInteger nextId = new AtomicInteger(0);
+    //private static final AtomicInteger NEXT_ID = new AtomicInteger(0);
 
     private final AtomicInteger waitForFx = new AtomicInteger(0);
 
     public final AtomicBoolean waitForMsg = new AtomicBoolean(false);
 
     private int count = 0;
-    private int FXcount = 0;
+    //private int fxCount = 0;
 
-    private ArrayList<Position> old = new ArrayList<Position>();
+    //private ArrayList<Position> old = new ArrayList<Position>();
 
     public Robot(GameState gameState) {
         this(gameState, Strategy.Random);
@@ -68,8 +66,8 @@ public class Robot implements MoveDelegate {
     public Robot(GameState gameState, Strategy strategy) {
         this.strategy = strategy;
         this.gameState = gameState;
-        this.id = numRobots;
-        numRobots++;
+        //this.id = numRobots;
+        //numRobots++;
     }
 
     /**
@@ -104,11 +102,12 @@ public class Robot implements MoveDelegate {
             public void run() {
                 while(!gameState.noGemsLeft() && running.get()) {
                     while(waitForMsg.get()){
-
+                        int x = 1;
                     }
                     waitForFx.set(0);
                     count++;
-                    //System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "whileloop:" + (!gameState.noGemsLeft() && running.get()));
+                    //System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "whileloop:" +
+                    // (!gameState.noGemsLeft() && running.get()));
                     try {
                         Thread.sleep(timeIntervalGenerator.next());
                     } catch (InterruptedException e) {
@@ -122,6 +121,7 @@ public class Robot implements MoveDelegate {
                     else
                         Platform.runLater( () -> makeMoveSmartly(processor) );
                     while(waitForFx.get() == 0 && !gameState.noGemsLeft() && running.get()){
+                        int x = 1;
                     }
 
                     if (gameState.hasLost()){
@@ -178,7 +178,7 @@ public class Robot implements MoveDelegate {
         Collections.shuffle(directions);
         Direction aliveDirection = null;
         Direction deadDirection = null;
-        lock.lock();
+        LOCK.lock();
         //System.out.println(FXcount +" " + count + " " + id);
         for (var direction :
                 directions) {
@@ -195,7 +195,7 @@ public class Robot implements MoveDelegate {
             processor.move(deadDirection);
         }
         //System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "Finish");
-        lock.unlock();
+        LOCK.unlock();
         waitForFx.set(1);
 
     }
@@ -223,35 +223,35 @@ public class Robot implements MoveDelegate {
         }
         return distance;
     }
-    private boolean checkAnotherPlayer(Position Org){
+    private boolean checkAnotherPlayer(Position org){
         var gameCol = gameState.getGameBoard().getNumCols();
         var gameRow = gameState.getGameBoard().getNumRows();
-        if (Org.row()>0) {
-            Position up = new Position(Org.row() - 1, Org.col());
+        if (org.row()>0) {
+            Position up = new Position(org.row() - 1, org.col());
             if (gameState.getGameBoard().getCell(up) instanceof EntityCell) {
                 if (gameState.getGameBoard().getEntityCell(up).getEntity() instanceof Player) {
                     return true;
                 }
             }
         }
-        if (Org.row()<gameRow - 1) {
-            Position down = new Position(Org.row() + 1, Org.col());
+        if (org.row()<gameRow - 1) {
+            Position down = new Position(org.row() + 1, org.col());
             if (gameState.getGameBoard().getCell(down) instanceof EntityCell) {
                 if (gameState.getGameBoard().getEntityCell(down).getEntity() instanceof Player) {
                     return true;
                 }
             }
         }
-        if (Org.col() > 0) {
-            Position left = new Position(Org.row(), Org.col() - 1);
+        if (org.col() > 0) {
+            Position left = new Position(org.row(), org.col() - 1);
             if (gameState.getGameBoard().getCell(left) instanceof EntityCell){
                 if (gameState.getGameBoard().getEntityCell(left).getEntity() instanceof Player){
                     return true;
                 }
             }
         }
-        if (Org.col() < gameCol - 1) {
-            Position right = new Position(Org.row(), Org.col() + 1);
+        if (org.col() < gameCol - 1) {
+            Position right = new Position(org.row(), org.col() + 1);
             if (gameState.getGameBoard().getCell(right) instanceof EntityCell){
                 if (gameState.getGameBoard().getEntityCell(right).getEntity() instanceof Player){
                     return true;
@@ -287,7 +287,7 @@ public class Robot implements MoveDelegate {
         ArrayList<Direction> move2 = new ArrayList<Direction>();
         ArrayList<Direction> move3 = new ArrayList<Direction>();
         Direction movein = null;
-        lock.lock();
+        LOCK.lock();
         MoveResult old = null;
         var chose = new ArrayList<Direction>();
         int distance = -1;
@@ -305,18 +305,19 @@ public class Robot implements MoveDelegate {
                     (Objects.requireNonNull(result.newPosition).row()==((MoveResult.Valid.Alive) old).origPosition.row()) &&
                     (result.newPosition.col()==((MoveResult.Valid.Alive) old).origPosition.col())){
                 move1.add(direction);
-            }
-            else if (result instanceof MoveResult.Valid.Alive) {
+            } else if (result instanceof MoveResult.Valid.Alive) {
                 var temp  = closestPlayer(result.newPosition, listOfGem);
+                move2.add(direction);
                 if (distance <= 0 || distance >= temp) {
                     System.out.println(direction);
                     System.out.println(distance);
                     distance = temp;
                     move2.add(direction);
+                    move2.add(direction);
                 }
             } else if (result instanceof MoveResult.Valid.Dead) {
                 move0.add(direction);
-            }else{
+            } else{
                 movein = direction;
             }
         }
@@ -324,8 +325,7 @@ public class Robot implements MoveDelegate {
             Collections.shuffle(move3);
             System.out.println(move3);
             processor.move(move3.get(0));
-        }
-        else if (!move2.isEmpty()) {
+        } else if (!move2.isEmpty()) {
             Collections.shuffle(move2);
             System.out.println(move2);
             processor.move(move2.get(0));
@@ -333,7 +333,7 @@ public class Robot implements MoveDelegate {
             Collections.shuffle(move1);
             System.out.println(move1);
             processor.move(move1.get(0));
-        }else {
+        } else {
             assert gameState.getPlayer().getOwner() != null;
             if (checkAnotherPlayer(gameState.getPlayer().getOwner().getPosition())){
                 assert movein != null;
@@ -344,7 +344,7 @@ public class Robot implements MoveDelegate {
             }
         }
         //System.out.println(count + " Thread id: " + Thread.currentThread() + " " + "Finish");
-        lock.unlock();
+        LOCK.unlock();
         waitForFx.set(1);
     }
 

@@ -5,7 +5,6 @@ import hk.ust.cse.comp3021.pa3.controller.GameController;
 import hk.ust.cse.comp3021.pa3.model.GameBoard;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.model.MoveResult;
-import hk.ust.cse.comp3021.pa3.util.Robot;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.UIServices;
 import hk.ust.cse.comp3021.pa3.view.events.MoveEvent;

@@ -1,6 +1,8 @@
 package hk.ust.cse.comp3021.pa3.model;
 
 import hk.ust.cse.comp3021.pa3.controller.GameBoardController;
+import hk.ust.cse.comp3021.pa3.util.MoveDelegate;
+import hk.ust.cse.comp3021.pa3.util.Robot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -59,6 +61,8 @@ public class GameState {
      * The number of gems initially on the game board when this instance was created.
      */
     private final int initialNumOfGems;
+
+    public Robot robot;
 
     /**
      * Creates an instance.
@@ -313,5 +317,11 @@ public class GameState {
      */
     public Player getPlayer() {
         return player;
+    }
+
+    public void setRobot(MoveDelegate robotset){
+        if (robotset instanceof Robot){
+            robot = (Robot) robotset;
+        }
     }
 }

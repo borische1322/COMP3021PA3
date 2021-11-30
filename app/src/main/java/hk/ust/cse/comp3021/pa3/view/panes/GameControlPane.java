@@ -106,6 +106,7 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      */
     public void delegateControl(MoveDelegate delegate) {
         moveDelegate = delegate;
+        getGameState().setRobot(delegate);
         delegate.startDelegation(direction -> GameControlPane.this.move(direction));
         disable();
     }

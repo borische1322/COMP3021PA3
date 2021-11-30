@@ -5,6 +5,7 @@ import hk.ust.cse.comp3021.pa3.controller.GameController;
 import hk.ust.cse.comp3021.pa3.model.GameBoard;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.model.MoveResult;
+import hk.ust.cse.comp3021.pa3.util.Robot;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.UIServices;
 import hk.ust.cse.comp3021.pa3.view.events.MoveEvent;
@@ -117,7 +118,14 @@ public class MainGamePane extends VBox implements GameUIComponent {
         // show lose dialog if the move event indicates a player loses and get kicked out of the game board.
         if (e.getMoveResult() instanceof MoveResult.Valid.KickedOut) {
             getPlayerPane(e.getPlayerID()).kickOut();
+            GameState[] allRobot = gameController.getGameStates();
+            for (int i = 0; i < allRobot.length; i++)
+                if (allRobot[i].robot != null)
+                    allRobot[i].robot.waitForMsg.set(true);
             UIServices.showLoseDialog(gameController.getGameBoard().getPlayer(e.getPlayerID()));
+            for (int i = 0; i < allRobot.length; i++)
+                if (allRobot[i].robot != null)
+                    allRobot[i].robot.waitForMsg.set(false);
         }
 
         // try to get winners from the game controller
